@@ -174,14 +174,16 @@
     stage.insertBefore(v, stage.firstChild);
     return v;
   });
-  function ensure(i) { const v = vids[i]; if (v && !v.src) { v.src = v.dataset.src; v.preload = "auto"; v.load(); } }
+  function ensure(i) { const v = vids[i]; if (v && !v.getAttribute("src")) { v.src = v.dataset.src; v.preload = "auto"; v.load(); } }
   let cur = -1;
   function go(i) {
     i = Math.max(0, Math.min(SLIDES.length - 1, i));
     if (i === cur) return;
     if (cur >= 0) { vids[cur].pause(); vids[cur].classList.remove("on"); }
     cur = i;
-    ensure(i); ensure(i + 1); ensure(i + 2);
+    // load only this clip and its neighbours; release the rest so downloads never queue up
+    vids.forEach((v, j) => { if ((j < i - 1 || j > i + 1) && v.getAttribute("src")) { v.pause(); v.removeAttribute("src"); v.load(); } });
+    ensure(i); ensure(i + 1); ensure(i - 1);
     const v = vids[i];
     v.classList.add("on");
     try { v.currentTime = 0; } catch (e) {}
