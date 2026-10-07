@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI for Small Business — Rahim Daya</title>
+<style>
+  @font-face { font-family: "Space Grotesk"; src: url("SpaceGrotesk.woff2") format("woff2"); font-weight: 300 700; }
+  @font-face { font-family: "Inter"; src: url("Inter.woff2") format("woff2"); font-weight: 100 900; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #05070f; color: #e8ecf8; font-family: "Inter", system-ui, sans-serif; overflow: hidden; }
+  .app { position: fixed; inset: 0; display: flex; flex-direction: column; }
+  .stage { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+  video { position: absolute; max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain; background: #0b1020; opacity: 0; transition: opacity 0.15s; }
+  video.on { opacity: 1; }
+  .bar { flex: none; display: flex; align-items: center; gap: 14px; padding: 10px 16px; background: #0b1020; border-top: 1px solid #26305a; font-size: 14px; }
+  .bar button { background: #182044; color: #e8ecf8; border: 1px solid #34407a; border-radius: 8px; padding: 7px 14px; font: inherit; cursor: pointer; }
+  .bar button:hover { border-color: #22d3ee; }
+  .count { font-family: "Space Grotesk", sans-serif; font-weight: 700; min-width: 64px; text-align: center; }
+  .label { flex: 1; color: #a3acd0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .help { color: #6b76a3; font-size: 12px; }
+  .notes { flex: none; max-height: 30vh; overflow: auto; padding: 14px 20px; background: #0f1530; border-top: 1px solid #26305a; font-size: 16px; line-height: 1.5; color: #c9d1ea; }
+  .notes b { color: #22d3ee; font-family: "Space Grotesk", sans-serif; }
+  .progress { height: 3px; background: #121935; flex: none; }
+  .progress i { display: block; height: 100%; background: #22d3ee; width: 0; transition: width 0.2s; }
+  .tap { position: absolute; top: 0; bottom: 0; width: 30%; cursor: pointer; }
+  .tap.l { left: 0; } .tap.r { right: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="stage" id="stage"><div class="tap l" id="tapL" title="Previous"></div><div class="tap r" id="tapR" title="Next"></div></div>
+  <div class="progress"><i id="prog"></i></div>
+  <div class="notes" id="notes" hidden></div>
+  <div class="bar">
+    <button id="prev" aria-label="Previous slide">◀</button>
+    <span class="count" id="count"></span>
+    <button id="next" aria-label="Next slide">▶</button>
+    <span class="label" id="label"></span>
+    <button id="replay">Replay</button>
+    <button id="ntog">Notes</button>
+    <button id="fs">Fullscreen</button>
+    <span class="help">← → navigate · N notes · F fullscreen</span>
+  </div>
+</div>
+<script>
+  const SLIDES = [
+ {
+  "label": "Title",
+  "src": "clips/s01-title.mp4",
+  "notes": "~0:30. Welcome. I'm Rahim. No jargon today: two everyday jobs every small business has, done with AI. Everything you'll see is a recording, so no live-demo gods to anger. The promise is on the slide: run the business, let AI do the admin. (The little robot is your new admin assistant.)"
+ },
+ {
+  "label": "You do the admin",
+  "src": "clips/s02a-you-do-the-admin.mp4",
+  "notes": "~0:25. 'When you run a small business, you run the business AND you do the admin.' Point at the pile landing: quotes, invoices, receipts, a parking ticket. Point at the bar: your evening disappearing into admin, 6 PM to nearly midnight."
+ },
+ {
+  "label": "AI does the admin",
+  "src": "clips/s02b-ai-does-the-admin.mp4",
+  "notes": "~0:25. 'Today's idea: you run the business, AI does the admin.' It's not magic; it's a helper that drafts, sorts and flags. The bar shrinks back: you get your evening back."
+ },
+ {
+  "label": "Crescent Town Events",
+  "src": "clips/s03-company.mp4",
+  "notes": "~0:40. Meet our example, Crescent Town Events: a fictional one-person event planner in Scarborough. Owner-run, a helper on event days. Quotes, invoices and receipts all done by hand, after hours. Two jobs today: quoting a new client, and taming the paperwork pile."
+ },
+ {
+  "label": "Clip 1: The meeting",
+  "src": "clips/s04-meeting.mp4",
+  "notes": "~0:50 (clip 42s). Tuesday morning, meeting with Aliya at Taylor Creek Dental. Holiday party. Let the bubbles land; read the odd one aloud. Watch the counter: 13 details. One really matters: the nut allergy. And she wants the quote by Friday."
+ },
+ {
+  "label": "How most people use AI",
+  "src": "clips/s06-most-people.mp4",
+  "notes": "~0:20. 'Most people go back to the office, type up formal notes, paste them in with one line, and hope.' Let's try exactly that."
+ },
+ {
+  "label": "Clip 2: Round 1",
+  "src": "clips/s07-round1.mp4",
+  "notes": "~0:45 (clip 45s). The answer looks fine at a glance... until you read it. No prices, it doesn't know my rates. The nut allergy is gone. 45 guests ignored. Venue rental never mentioned. Looks amateur. Can't send it."
+ },
+ {
+  "label": "Don't type, ramble",
+  "src": "clips/s05a-ramble-intro.mp4",
+  "notes": "~0:15. 'Here's the first trick: don't type. Ramble. AI will organize the information for you.' Click when ready: the read-along starts immediately on the next slide."
+ },
+ {
+  "label": "Clip 3: The ramble (read along)",
+  "src": "clips/s05-ramble.mp4",
+  "notes": "~1:25 (clip 90s). Captions start as soon as you land here. READ ALOUD as the words light up (~140 wpm). Cyan = facts, amber = things I still need to confirm. Don't rush; the text stays on screen."
+ },
+ {
+  "label": "Treat AI like a new hire",
+  "src": "clips/s08-new-hire.mp4",
+  "notes": "~0:35. 'Treat AI like a new hire, not a search box.' A new employee wouldn't know your prices on day one. Give it context about your business: your rate sheet, a past quote, and the ramble audio, and tell it what you want checked."
+ },
+ {
+  "label": "Clip 4: Round 2 quote",
+  "src": "clips/s09-round2.mp4",
+  "notes": "~0:55 (clip 50s). Same AI, plus my rate sheet, a past quote and the ramble. The quote builds in MY format: nut-free menu line, dessert bar, both music options. DJ $7,661.40, playlist $7,039.90, both under her $8,000."
+ },
+ {
+  "label": "Please confirm before sending",
+  "src": "clips/s09b-confirm-list.mp4",
+  "notes": "~0:30. AI flagged what it couldn't know: venue availability (rental billed separately), 40 vs 45 guests (+$339), how serious the allergy is, DJ or playlist. Walk through them. Click: you approve."
+ },
+ {
+  "label": "Approved",
+  "src": "clips/s09c-confirm-approved.mp4",
+  "notes": "~0:15. Each item gets ticked, then APPROVED. You checked it; now it can go to Aliya."
+ },
+ {
+  "label": "What AI caught (quote)",
+  "src": "clips/s10-quote-caught.mp4",
+  "notes": "~0:40. Catch every little detail: the six catches. My format, my prices, ready for me to review. This is where a rushed human at 11 PM slips."
+ },
+ {
+  "label": "The paperwork pile",
+  "src": "clips/s11-paperwork.mp4",
+  "notes": "~0:30. Job 2. 'It starts with one invoice. Then another. And another. Every business has a folder like this.' Ask: who has a shoebox like this?"
+ },
+ {
+  "label": "Clip 5: Snap and drop",
+  "src": "clips/s12-snap-drop.mp4",
+  "notes": "~0:50 (clip 45s). Step 1: snap it, don't scan it; crooked photos in any lighting are fine. Step 2: drop everything in one folder. Step 3: hand it over with clear instructions: table, rename, sort, action list."
+ },
+ {
+  "label": "Results: the table",
+  "src": "clips/s13a-results-table.mp4",
+  "notes": "~0:30. A clean table of all 10 documents, read from PDFs and photos. Note the duplicate row in amber."
+ },
+ {
+  "label": "Results: renamed and sorted",
+  "src": "clips/s13b-results-renamed.mp4",
+  "notes": "~0:25. Every file renamed the same way (date, vendor, amount) and sorted into folders your bookkeeper will love."
+ },
+ {
+  "label": "Results: action list",
+  "src": "clips/s13c-results-actions.mp4",
+  "notes": "~0:45. As of today: helium tank back by Oct 28 or $60 (from the faded print!), florist + parking due Oct 30, Maple Mobile Nov 3; East York Family Dental owes $1,733.42; the florist invoice is in there twice."
+ },
+ {
+  "label": "What AI caught (paperwork)",
+  "src": "clips/s14-paper-caught.mp4",
+  "notes": "~0:40. $421.49 not paid twice. $1,733.42 to collect. $60 fee avoided. Three due dates. From phone photos and messy PDFs. You still check every line."
+ },
+ {
+  "label": "Three habits",
+  "src": "clips/s15-habits.mp4",
+  "notes": "~1:00. 1) Give it what you already have: PDFs, Word docs, phone photos, crumpled receipts. 2) Treat AI like an employee: tell it what to do, not how to do it. 3) Ask AI if it has any questions; it will tell you what's confusing."
+ },
+ {
+  "label": "You're the editor-in-chief",
+  "src": "clips/s16-editor.mp4",
+  "notes": "~0:45. Always review before it reaches a client. Only hand off work you can judge: if you can't tell good from bad, you can't catch mistakes. 'Good enough' usually isn't; take one more pass."
+ },
+ {
+  "label": "Try this Monday",
+  "src": "clips/s17-monday.mp4",
+  "notes": "~0:35. Three prompts to try Monday: quotes, paperwork, emails. Pick one, attach your real files, review what comes back."
+ },
+ {
+  "label": "Thank you + Questions",
+  "src": "clips/s18-thanks.mp4",
+  "notes": "~0:15, then Q&A (10 min). Thank you for spending your Sunday here, and for taking the leap to try AI. Questions?"
+ }
+];
+  const stage = document.getElementById("stage");
+  const vids = SLIDES.map((s) => {
+    const v = document.createElement("video");
+    v.muted = true; v.playsInline = true; v.preload = "none";
+    v.dataset.src = s.src;
+    stage.insertBefore(v, stage.firstChild);
+    return v;
+  });
+  function ensure(i) { const v = vids[i]; if (v && !v.src) { v.src = v.dataset.src; v.preload = "auto"; v.load(); } }
+  let cur = -1;
+  function go(i) {
+    i = Math.max(0, Math.min(SLIDES.length - 1, i));
+    if (i === cur) return;
+    if (cur >= 0) { vids[cur].pause(); vids[cur].classList.remove("on"); }
+    cur = i;
+    ensure(i); ensure(i + 1); ensure(i + 2);
+    const v = vids[i];
+    v.classList.add("on");
+    try { v.currentTime = 0; } catch (e) {}
+    const p = v.play(); if (p && p.catch) p.catch(() => {});
+    document.getElementById("count").textContent = (i + 1) + " / " + SLIDES.length;
+    document.getElementById("label").textContent = SLIDES[i].label;
+    document.getElementById("notes").innerHTML = "<b>" + SLIDES[i].label + "</b> &nbsp; " + SLIDES[i].notes.replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+    document.getElementById("prog").style.width = ((i + 1) / SLIDES.length) * 100 + "%";
+    history.replaceState(null, "", "#" + (i + 1));
+  }
+  const next = () => go(cur + 1), prev = () => go(cur - 1);
+  document.getElementById("next").onclick = next;
+  document.getElementById("prev").onclick = prev;
+  document.getElementById("tapR").onclick = next;
+  document.getElementById("tapL").onclick = prev;
+  document.getElementById("replay").onclick = () => { const v = vids[cur]; v.currentTime = 0; v.play(); };
+  const tn = () => { const n = document.getElementById("notes"); n.hidden = !n.hidden; };
+  document.getElementById("ntog").onclick = tn;
+  const tf = () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); };
+  document.getElementById("fs").onclick = tf;
+  document.addEventListener("keydown", (e) => {
+    if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); next(); }
+    else if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); prev(); }
+    else if (e.key === "n" || e.key === "N") tn();
+    else if (e.key === "f" || e.key === "F") tf();
+    else if (e.key === "Home") go(0);
+    else if (e.key === "End") go(SLIDES.length - 1);
+  });
+  const start = parseInt(location.hash.slice(1), 10);
+  go(Number.isFinite(start) ? start - 1 : 0);
+</script>
+</body>
+</html>
