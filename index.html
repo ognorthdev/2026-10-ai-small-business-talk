@@ -13,15 +13,18 @@
   .stage { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
   video { position: absolute; max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain; background: #0b1020; opacity: 0; transition: opacity 0.15s; }
   video.on { opacity: 1; }
-  .bar { flex: none; display: flex; align-items: center; gap: 14px; padding: 10px 16px; background: #0b1020; border-top: 1px solid #26305a; font-size: 14px; }
-  .bar button { background: #182044; color: #e8ecf8; border: 1px solid #34407a; border-radius: 8px; padding: 7px 14px; font: inherit; cursor: pointer; }
+  .bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: linear-gradient(180deg, rgba(5, 7, 15, 0), rgba(5, 7, 15, 0.85)); font-size: 13px; opacity: 0; transition: opacity 0.4s; }
+  .app.awake .bar { opacity: 1; }
+  .app:not(.awake) .bar { pointer-events: none; }
+  .bar button { background: rgba(24, 32, 68, 0.8); color: #e8ecf8; border: 1px solid #34407a; border-radius: 8px; padding: 6px 12px; font: inherit; cursor: pointer; }
+  .app:not(.awake) { cursor: none; }
   .bar button:hover { border-color: #22d3ee; }
   .count { font-family: "Space Grotesk", sans-serif; font-weight: 700; min-width: 64px; text-align: center; }
-  .label { flex: 1; color: #a3acd0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .spacer { flex: 1; }
   .help { color: #6b76a3; font-size: 12px; }
   .notes { flex: none; max-height: 30vh; overflow: auto; padding: 14px 20px; background: #0f1530; border-top: 1px solid #26305a; font-size: 16px; line-height: 1.5; color: #c9d1ea; }
   .notes b { color: #22d3ee; font-family: "Space Grotesk", sans-serif; }
-  .progress { height: 3px; background: #121935; flex: none; }
+  .progress { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(18, 25, 53, 0.6); }
   .progress i { display: block; height: 100%; background: #22d3ee; width: 0; transition: width 0.2s; }
   .tap { position: absolute; top: 0; bottom: 0; width: 30%; cursor: pointer; }
   .tap.l { left: 0; } .tap.r { right: 0; }
@@ -29,19 +32,20 @@
 </head>
 <body>
 <div class="app">
-  <div class="stage" id="stage"><div class="tap l" id="tapL" title="Previous"></div><div class="tap r" id="tapR" title="Next"></div></div>
+  <div class="stage" id="stage"><div class="tap l" id="tapL" title="Previous"></div><div class="tap r" id="tapR" title="Next"></div>
   <div class="progress"><i id="prog"></i></div>
-  <div class="notes" id="notes" hidden></div>
-  <div class="bar">
+  <div class="bar" id="bar">
     <button id="prev" aria-label="Previous slide">◀</button>
     <span class="count" id="count"></span>
     <button id="next" aria-label="Next slide">▶</button>
-    <span class="label" id="label"></span>
+    <span class="spacer"></span>
     <button id="replay">Replay</button>
     <button id="ntog">Notes</button>
     <button id="fs">Fullscreen</button>
     <span class="help">← → navigate · N notes · F fullscreen</span>
   </div>
+  </div>
+  <div class="notes" id="notes" hidden></div>
 </div>
 <script>
   const SLIDES = [
@@ -189,7 +193,6 @@
     try { v.currentTime = 0; } catch (e) {}
     const p = v.play(); if (p && p.catch) p.catch(() => {});
     document.getElementById("count").textContent = (i + 1) + " / " + SLIDES.length;
-    document.getElementById("label").textContent = SLIDES[i].label;
     document.getElementById("notes").innerHTML = "<b>" + SLIDES[i].label + "</b> &nbsp; " + SLIDES[i].notes.replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
     document.getElementById("prog").style.width = ((i + 1) / SLIDES.length) * 100 + "%";
     history.replaceState(null, "", "#" + (i + 1));
@@ -212,6 +215,12 @@
     else if (e.key === "Home") go(0);
     else if (e.key === "End") go(SLIDES.length - 1);
   });
+  // controls appear on mouse/touch activity and fade after 2.5s of stillness
+  const app = document.querySelector(".app");
+  let idle;
+  const wake = () => { app.classList.add("awake"); clearTimeout(idle); idle = setTimeout(() => { if (!document.getElementById("bar").matches(":hover")) app.classList.remove("awake"); }, 2500); };
+  ["mousemove", "mousedown", "touchstart"].forEach((ev) => document.addEventListener(ev, wake, { passive: true }));
+  wake();
   const start = parseInt(location.hash.slice(1), 10);
   go(Number.isFinite(start) ? start - 1 : 0);
 </script>
