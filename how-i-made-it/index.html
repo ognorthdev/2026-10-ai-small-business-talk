@@ -126,6 +126,12 @@
   .lesson h3 { margin-top: 14px; font-size: 19px; }
   .lesson p { margin-top: 8px; color: var(--dim); font-size: 15px; }
 
+  .diy { border-radius: 22px; border: 1px solid var(--violet2); background: linear-gradient(135deg, rgba(139, 92, 246, 0.14), rgba(34, 211, 238, 0.06)); padding: 32px; }
+  .diy h2 { margin-top: 8px; }
+  .prompt { position: relative; margin-top: 20px; border-radius: 16px; background: #070b17; border: 1px solid var(--line); padding: 20px 22px; padding-right: 110px; font-family: "JetBrains Mono", monospace; font-size: 15px; line-height: 1.6; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .copy { position: absolute; top: 14px; right: 14px; border: 1px solid var(--line); background: var(--bg3); color: var(--ink); border-radius: 10px; padding: 8px 14px; font: 600 14px "Inter", sans-serif; cursor: pointer; }
+  .copy:hover { border-color: var(--cyan); }
+  @media (max-width: 640px) { .prompt { padding-right: 22px; padding-top: 58px; } .diy { padding: 22px; } }
   .final { text-align: center; border-top: 1px solid var(--line); }
   .final h2 { max-width: 760px; margin-inline: auto; }
   .final .ctas { justify-content: center; }
@@ -192,7 +198,7 @@
   <div class="wrap">
     <span class="part one">PART 1 · CAR + CLAUDE DESKTOP</span>
     <h2>Ideas first. No slides until there was a direction.</h2>
-    <p class="lead">I set one rule early: ideas first, no deck until we picked a direction. Most of the thinking happened in voice mode while driving, then carried on in text chat in Claude desktop. That's where the script and the flow of the talk took shape, over many rounds of "what if we…".</p>
+    <p class="lead">I set one rule early: ideas first, no deck until we picked a direction. Most of the thinking happened in voice mode while I was in the car, then carried on in text chat in Claude desktop. That's where the script and the flow of the talk took shape, over many rounds of "what if we…".</p>
 
     <div class="card" style="margin-top: 36px; border-color: rgba(167, 139, 250, 0.6)">
       <span class="tag">The heart of Part 1</span>
@@ -317,7 +323,7 @@
       <table>
         <thead><tr><th>Tool</th><th>What it did</th></tr></thead>
         <tbody>
-          <tr><td>Claude voice mode<span class="ph one">PART 1</span></td><td>Hands-free brainstorming in the car: the audience, the story and the demo ideas.</td></tr>
+          <tr><td>Claude voice mode<span class="ph one">PART 1</span></td><td>Brainstorming out loud in the car: the audience, the story and the demo ideas.</td></tr>
           <tr><td>Claude desktop chat<span class="ph one">PART 1</span></td><td>Settled the direction, wrote the ramble script and prompts, and generated the demo files and planted surprises.</td></tr>
           <tr><td>Claude Code CLI<span class="ph two">PART 2</span></td><td>Built everything else from my plain-English requests: storyboard, scenes, numbers, fixes, renders, publishing.</td></tr>
           <tr><td><a class="hf" href="https://github.com/heygen-com/hyperframes" target="_blank" rel="noopener">HeyGen HyperFrames</a><span class="ph two">PART 2</span></td><td>Open-source HTML-to-video framework. Its local skills and CLI were used to write scenes, run lint/check gates, snapshot frames, render MP4s, and run the presenter-mode slideshow.</td></tr>
@@ -390,6 +396,22 @@
   </div>
 </section>
 
+<section id="make-your-own">
+  <div class="wrap">
+    <div class="diy">
+      <div class="eyebrow">Make your own</div>
+      <h2>Want a presentation like this? Point your AI at this page.</h2>
+      <p class="lead">Copy the prompt below into Claude, ChatGPT or Claude Code, swap in your topic, and let it use this page as the playbook. It can read the whole workflow, the tools and the lessons, then plan yours step by step.</p>
+      <div class="prompt" id="diyPrompt">Read this page about how a 15-minute talk was planned and built with AI:
+https://ognorthdev.github.io/2026-10-ai-small-business-talk/how-i-made-it/
+
+Help me make a similar presentation about [my topic] for [my audience], about [length] minutes long.
+Follow the same approach: ideas first, then iterate the script and flow with me, then build it.
+Start by asking me a few questions about my audience and the story I want to tell.<button class="copy" id="copyBtn" type="button">Copy</button></div>
+    </div>
+  </div>
+</section>
+
 <section class="final">
   <div class="wrap">
     <div class="eyebrow">See the result</div>
@@ -405,5 +427,14 @@
 <footer>
   <div class="wrap">Made by Rahim Daya with Claude (voice, desktop and Claude Code) and <a class="hf" href="https://github.com/heygen-com/hyperframes" target="_blank" rel="noopener">HeyGen HyperFrames</a> · All businesses and documents in the demos are fictional.</div>
 </footer>
+<script>
+  document.getElementById("copyBtn").addEventListener("click", async (e) => {
+    const box = document.getElementById("diyPrompt");
+    const text = box.firstChild.textContent.trim();
+    try { await navigator.clipboard.writeText(text); e.target.textContent = "Copied ✓"; }
+    catch (err) { const range = document.createRange(); range.selectNodeContents(box); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range); e.target.textContent = "Press ⌘C"; }
+    setTimeout(() => { e.target.textContent = "Copy"; }, 2000);
+  });
+</script>
 </body>
 </html>
