@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>How I Built It — AI for Small Business</title>
+<meta name="description" content="How Rahim Daya built a 15-minute AI for Small Business talk using Claude voice mode, Claude desktop, Claude Code and HeyGen HyperFrames." />
+<style>
+  @font-face { font-family: "Space Grotesk"; src: url("../SpaceGrotesk.woff2") format("woff2"); font-weight: 300 700; font-display: swap; }
+  @font-face { font-family: "Inter"; src: url("../Inter.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+  @font-face { font-family: "JetBrains Mono"; src: url("../JetBrainsMono.woff2") format("woff2"); font-weight: 100 800; font-display: swap; }
+  :root {
+    --bg: #0b1020; --bg2: #121935; --bg3: #182044; --line: #26305a; --ink: #e8ecf8; --dim: #a3acd0;
+    --cyan: #22d3ee; --violet: #a78bfa; --violet2: #8b5cf6; --amber: #f59e0b;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: "Inter", system-ui, sans-serif; line-height: 1.6; font-size: 17px; -webkit-font-smoothing: antialiased; }
+  img { max-width: 100%; height: auto; display: block; }
+  a { color: var(--cyan); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-inline: max(20px, env(safe-area-inset-left)); }
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  .eyebrow { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--cyan); }
+  h1, h2, h3 { font-family: "Space Grotesk", sans-serif; letter-spacing: -0.02em; line-height: 1.1; }
+  h2 { font-size: clamp(30px, 4.4vw, 46px); margin-top: 10px; }
+  h3 { font-size: 22px; }
+  section { padding-block: 72px; }
+  .lead { color: var(--dim); font-size: 19px; max-width: 760px; margin-top: 16px; }
+
+  /* hero */
+  .hero { position: relative; overflow: hidden; padding-block: 88px 64px; border-bottom: 1px solid var(--line); }
+  .hero::before { content: ""; position: absolute; width: 900px; height: 900px; left: -300px; top: -420px; border-radius: 50%; background: radial-gradient(circle, rgba(34, 211, 238, 0.16), transparent 62%); pointer-events: none; }
+  .hero::after { content: ""; position: absolute; width: 900px; height: 900px; right: -320px; bottom: -520px; border-radius: 50%; background: radial-gradient(circle, rgba(139, 92, 246, 0.2), transparent 62%); pointer-events: none; }
+  .hero .wrap { position: relative; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center; }
+  .hero .wrap.sw { display: block; }
+  .hero h1 { font-size: clamp(38px, 5.6vw, 66px); margin-top: 14px; }
+  .hero h1 span { color: var(--cyan); }
+  .hero p { color: var(--dim); font-size: 19px; margin-top: 18px; }
+  .ctas { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 999px; font-weight: 600; text-decoration: none; font-size: 16px; }
+  .btn.primary { background: var(--cyan); color: #06121a; }
+  .btn.ghost { border: 1px solid var(--line); color: var(--ink); background: rgba(18, 25, 53, 0.6); }
+  .hero-shot { align-self: center; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55); transform: rotate(1.2deg); }
+  .stats { margin-top: 44px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; position: relative; }
+  .stat { border: 1px solid var(--line); background: rgba(18, 25, 53, 0.7); border-radius: 16px; padding: 16px 18px; }
+  .stat b { display: block; font-family: "Space Grotesk", sans-serif; font-size: 34px; color: var(--ink); line-height: 1.1; }
+  .stat span { font-size: 14px; color: var(--dim); }
+
+  /* flow */
+  .flow { margin-top: 40px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; align-items: stretch; }
+  .fstep { position: relative; border-radius: 16px; padding: 18px 16px; background: var(--bg2); border: 1px solid var(--line); }
+  .fstep.p1 { border-top: 3px solid var(--violet2); }
+  .fstep.p2 { border-top: 3px solid var(--cyan); }
+  .fstep .n { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--dim); }
+  .fstep h3 { font-size: 17px; margin-top: 6px; }
+  .fstep p { font-size: 14px; color: var(--dim); margin-top: 6px; line-height: 1.45; }
+  .fstep:not(:last-child)::after { content: "→"; position: absolute; right: -12px; top: 50%; transform: translate(50%, -50%); color: var(--dim); font-size: 18px; z-index: 1; }
+  .flow-legend { margin-top: 14px; display: flex; gap: 22px; font-size: 14px; color: var(--dim); flex-wrap: wrap; }
+  .flow-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 8px; vertical-align: -1px; }
+
+  /* part headers */
+  .part { display: inline-flex; align-items: center; gap: 10px; font-family: "JetBrains Mono", monospace; font-size: 13px; letter-spacing: 0.14em; padding: 6px 14px; border-radius: 999px; font-weight: 700; }
+  .part.one { background: rgba(139, 92, 246, 0.18); color: #c4b5fd; border: 1px solid var(--violet2); }
+  .part.two { background: rgba(34, 211, 238, 0.12); color: var(--cyan); border: 1px solid var(--cyan); }
+  .grid2 { margin-top: 36px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid3 { margin-top: 36px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card { border-radius: 18px; background: var(--bg2); border: 1px solid var(--line); padding: 24px; }
+  .card p, .card li { color: var(--dim); font-size: 16px; }
+  .card p { margin-top: 8px; }
+  .card ul { margin: 10px 0 0 18px; }
+  .card li { margin-top: 6px; }
+  .card b, .card strong { color: var(--ink); }
+  .card .tag { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 0.1em; color: var(--dim); text-transform: uppercase; margin-bottom: 6px; }
+  .card.amber { border-color: rgba(245, 158, 11, 0.6); background: #1d190e; }
+  .card.amber .tag { color: var(--amber); }
+  .quote-row { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .pill { font-family: "JetBrains Mono", monospace; font-size: 13px; padding: 6px 12px; border-radius: 10px; background: var(--bg3); border: 1px solid var(--line); color: var(--ink); }
+
+  /* timeline */
+  .timeline { margin-top: 40px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(var(--cyan), var(--violet2)); opacity: 0.5; }
+  .tl { position: relative; padding-left: 52px; margin-bottom: 30px; }
+  .tl::before { content: ""; position: absolute; left: 7px; top: 6px; width: 18px; height: 18px; border-radius: 50%; background: var(--bg); border: 3px solid var(--cyan); }
+  .tl .when { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--cyan); letter-spacing: 0.06em; }
+  .tl h3 { margin-top: 4px; }
+  .tl p { color: var(--dim); margin-top: 6px; max-width: 820px; }
+  .tl ul { margin: 8px 0 0 18px; color: var(--dim); max-width: 860px; }
+  .tl li { margin-top: 5px; }
+  .tl li b { color: var(--ink); }
+
+  /* gallery */
+  .gallery { margin-top: 36px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  figure { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--bg2); }
+  figure img { aspect-ratio: 16 / 9; object-fit: cover; width: 100%; }
+  figcaption { padding: 12px 14px; font-size: 14px; color: var(--dim); line-height: 1.45; }
+  figcaption b { color: var(--ink); display: block; font-size: 15px; }
+
+  /* tools */
+  .tools { margin-top: 36px; overflow-x: auto; border-radius: 16px; border: 1px solid var(--line); }
+  table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  th { text-align: left; font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); font-weight: 500; padding: 14px 18px; background: var(--bg2); border-bottom: 1px solid var(--line); }
+  td { padding: 14px 18px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 15px; color: var(--dim); }
+  td:first-child { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .ph { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 11px; padding: 2px 8px; border-radius: 6px; margin-left: 8px; vertical-align: 2px; font-weight: 700; }
+  .ph.one { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; }
+  .ph.two { background: rgba(34, 211, 238, 0.14); color: var(--cyan); }
+
+  /* features */
+  .feat { margin-top: 36px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .chips { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: 14px; padding: 7px 12px; border-radius: 999px; background: var(--bg3); border: 1px solid var(--line); color: var(--ink); }
+  .chip.v { border-color: var(--violet2); }
+
+  /* lessons */
+  .lessons { margin-top: 36px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; counter-reset: l; }
+  .lesson { counter-increment: l; border-radius: 18px; padding: 22px; background: var(--bg2); border: 1px solid var(--line); }
+  .lesson::before { content: counter(l); display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--cyan); color: #06121a; font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 20px; }
+  .lesson h3 { margin-top: 14px; font-size: 19px; }
+  .lesson p { margin-top: 8px; color: var(--dim); font-size: 15px; }
+
+  .final { text-align: center; border-top: 1px solid var(--line); }
+  .final h2 { max-width: 760px; margin-inline: auto; }
+  .final .ctas { justify-content: center; }
+  footer { padding-block: 28px 40px; color: var(--dim); font-size: 14px; text-align: center; padding-bottom: max(40px, env(safe-area-inset-bottom)); }
+
+  @media (max-width: 960px) {
+    .hero .wrap { grid-template-columns: 1fr; }
+    .hero-shot { transform: none; }
+    .flow { grid-template-columns: repeat(2, 1fr); }
+    .fstep::after { display: none; }
+    .grid3, .gallery, .lessons { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    section { padding-block: 52px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .flow, .grid2, .grid3, .gallery, .lessons, .feat { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Behind the talk · Oct 25, 2026</div>
+      <h1>How I built a 15&#8209;minute AI talk <span>with AI.</span></h1>
+      <p>I'm Rahim. My talk "AI for Small Business" was planned by talking to Claude in my car, and built as 28 animated slides in code with Claude Code and HeyGen HyperFrames. No slide software, no live demos. Here's the whole process, start to finish.</p>
+      <div class="ctas">
+        <a class="btn primary" href="../">▶ Watch the presentation</a>
+        <a class="btn ghost" href="#workflow">See how it was made</a>
+      </div>
+    </div>
+    <div class="hero-shot"><img src="img/title.jpg" alt="Title slide: AI for Small Business, with a robot filing receipts from a shoebox" width="1280" height="720" /></div>
+  </div>
+  <div class="wrap sw">
+    <div class="stats">
+      <div class="stat"><b>28</b><span>animated slides</span></div>
+      <div class="stat"><b>14:30</b><span>talk time, under the 15-min limit</span></div>
+      <div class="stat"><b>0</b><span>live demos: every demo is a rendered clip</span></div>
+      <div class="stat"><b>3</b><span>Claude surfaces: voice, desktop, Code</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="workflow">
+  <div class="wrap">
+    <div class="eyebrow">The workflow</div>
+    <h2>Two parts: think out loud, then build in code.</h2>
+    <p class="lead">Part 1 was about deciding what to say. Part 2 turned that plan into a finished, presentable deck, with a lot of back-and-forth along the way.</p>
+    <div class="flow">
+      <div class="fstep p1"><div class="n">01</div><h3>Voice mode in the car</h3><p>Brainstormed the talk out loud with Claude.</p></div>
+      <div class="fstep p1"><div class="n">02</div><h3>Claude desktop chat</h3><p>Picked the story, demos and planted surprises.</p></div>
+      <div class="fstep p1"><div class="n">03</div><h3>Demo assets + handoff</h3><p>Rate sheet, past quote, receipts, a written handoff.</p></div>
+      <div class="fstep p2"><div class="n">04</div><h3>Claude Code + HyperFrames</h3><p>Every slide written as an animated HTML scene.</p></div>
+      <div class="fstep p2"><div class="n">05</div><h3>Feedback rounds</h3><p>About a dozen rounds of "change this, split that".</p></div>
+      <div class="fstep p2"><div class="n">06</div><h3>Ship it</h3><p>Presenter deck, public web deck, backup video, notes.</p></div>
+    </div>
+    <div class="flow-legend"><span><i style="background: var(--violet2)"></i>Part 1 · Claude voice mode + Claude desktop</span><span><i style="background: var(--cyan)"></i>Part 2 · Claude Code CLI + HeyGen HyperFrames</span></div>
+  </div>
+</section>
+
+<section id="part1" style="background: linear-gradient(180deg, rgba(139, 92, 246, 0.06), transparent 60%)">
+  <div class="wrap">
+    <span class="part one">PART 1 · CAR + CLAUDE DESKTOP</span>
+    <h2>Ideas first. No slides until there was a direction.</h2>
+    <p class="lead">I set one rule early: ideas first, no deck until we picked a direction. Most of that thinking happened in voice mode while driving, then carried on in text chat in Claude desktop.</p>
+
+    <div class="grid2">
+      <div class="card">
+        <span class="tag">The brief</span>
+        <h3>A talk for beginners</h3>
+        <ul>
+          <li>Small business owners and solopreneurs, many new to AI.</li>
+          <li><b>15 minutes</b> plus 10 minutes of Q&amp;A.</li>
+          <li><b>No live demos:</b> every demo is a pre-recorded animated clip that I narrate.</li>
+          <li>No slide on screen for more than about a minute.</li>
+          <li>Original plan: Google Slides with a dark "AI" theme. That changed in Part 2.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="tag">The example business</span>
+        <h3>Crescent Town Events</h3>
+        <p>A fictional one-person event planner in Scarborough, near Victoria Park Station, with suppliers and venues named after real local streets.</p>
+        <p>An earlier version used a deck-building contractor. We dropped it for knowledge work, which more of the audience could relate to.</p>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <span class="tag">Demo 1 · the context lesson</span>
+        <h3>A rambling voice memo becomes a priced quote</h3>
+        <p>After a client meeting (a holiday party for Taylor Creek Dental), a 90-second voice note goes to AI twice.</p>
+        <ul>
+          <li><b>Round 1</b>, no context: placeholder prices.</li>
+          <li><b>Round 2</b>, with my rate sheet and a past quote: real numbers in my own format.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="tag">Demo 2 · the multimodal lesson</span>
+        <h3>A shoebox of receipts becomes an action list</h3>
+        <p>A folder of mixed PDFs and phone photos turns into a table of every document, consistently renamed files sorted into folders, and a list of bills due, money owed and anything odd.</p>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <span class="tag">Generated in chat</span>
+        <h3>Realistic demo files</h3>
+        <ul>
+          <li>A 2026 rate sheet and a past quote (PDFs), plus the ramble script with both prompts.</li>
+          <li>An "inbox" of 5 invoice and receipt PDFs and 4 receipt photos, with deliberately messy file names.</li>
+          <li>A printable parking ticket, clearly marked as a demo sample, to photograph on a desk.</li>
+          <li>Presenter notes kept <b>outside</b> the inbox folder, so the AI couldn't peek at the answers.</li>
+        </ul>
+      </div>
+      <div class="card amber">
+        <span class="tag">Planted surprises in demo 2</span>
+        <h3>Things a busy owner would miss</h3>
+        <ul>
+          <li>The same florist invoice saved twice under different names: <b>don't pay $421.49 twice.</b></li>
+          <li>An invoice to a dental client that's past due: <b>$1,733.42 to chase.</b></li>
+          <li>A faded receipt hiding a helium tank return deadline: <b>$60 late fee.</b></li>
+          <li>A parking ticket with a payment date coming up.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="lead" style="margin-top: 28px">The first animated clip came out of the HyperFrames cloud connector looking too basic. So Part 1 ended with a written handoff file and the demo assets, and the build moved to Claude Code on my Mac.</p>
+  </div>
+</section>
+
+<section id="part2" style="background: linear-gradient(180deg, rgba(34, 211, 238, 0.05), transparent 60%)">
+  <div class="wrap">
+    <span class="part two">PART 2 · CLAUDE CODE CLI + HEYGEN HYPERFRAMES</span>
+    <h2>Every slide written in code, then rendered to video.</h2>
+    <p class="lead"><b style="color: var(--ink)">HyperFrames</b> is HeyGen's open-source framework for making video out of web pages. Instead of an AI guessing at pixels, Claude Code writes HTML, CSS and GSAP animation code, and HyperFrames renders it frame by frame into crisp MP4 clips. Every word and number on screen is exact, and any change is a quick edit and re-render.</p>
+
+    <div class="timeline">
+      <div class="tl">
+        <div class="when">Oct 6 · Setup and storyboard</div>
+        <h3>Confirm the tools, then plan before building</h3>
+        <p>Claude Code confirmed the local HyperFrames skills and command-line tools, read the Part 1 handoff and demo files, and proposed a slide-by-slide storyboard. I rewrote the key messages before anything was built:</p>
+        <ul>
+          <li><b>"You run the business. Let AI do the admin."</b> became the theme of the whole talk.</li>
+          <li><b>"Treat AI like a new hire, not a search box."</b> Give it your rates, past work and format.</li>
+          <li><b>"You're the editor-in-chief."</b> Review before anything reaches a client. No fear-mongering.</li>
+          <li>A closing <b>thank-you</b> to the audience for taking the leap to try AI.</li>
+        </ul>
+        <p>I also chose to build the presentation itself in HyperFrames (with presenter mode and speaker notes), with MP4 backups of every clip, instead of Google Slides.</p>
+      </div>
+      <div class="tl">
+        <div class="when">Oct 6 · A sample first</div>
+        <h3>Build slides 1–4, judge the quality, then commit</h3>
+        <p>Rather than generating everything at once, I asked for just the opening and the first demo clip so I could judge the look. A brand file set the "Midnight Signal" palette and fonts, and every scene passed HyperFrames' lint and check gates (layout, overlap, contrast) and was reviewed from still frames before rendering.</p>
+      </div>
+      <div class="tl">
+        <div class="when">Oct 6–7 · Build out all the slides</div>
+        <h3>Real files, real numbers</h3>
+        <ul>
+          <li>The Round 2 quote uses the actual rate sheet: <b>$7,661.40 with a DJ, $7,039.90 with a playlist</b>, both under the client's $8,000 budget.</li>
+          <li>The receipt demo shows the <b>real receipt photos</b> and the parking ticket from the Part 1 files.</li>
+          <li>The ramble became a <b>read-along slide</b>: words light up as I say them, with facts in cyan and "still to confirm" items in amber.</li>
+          <li>Speaker notes and a talk timing were written for every slide.</li>
+        </ul>
+      </div>
+      <div class="tl">
+        <div class="when">Oct 7 · Sharing</div>
+        <h3>A public web version, a backup video and speaker notes</h3>
+        <p>HyperFrames' cloud publishing worked, but claiming the project was temporarily disabled. So Claude Code built a lightweight web player with the same clips and published it on GitHub Pages, with a full-length backup video and a shareable speaker-notes doc for my reviewer.</p>
+      </div>
+      <div class="tl">
+        <div class="when">Oct 16 · Reviewer feedback</div>
+        <h3>Make the chat look real, and add intermediate tips</h3>
+        <ul>
+          <li><b>Branded chat windows.</b> Claude checked the facts first: Claude's chat app can't accept audio files, but ChatGPT can, and ChatGPT also has Skills and Scheduled tasks. So the demos show ChatGPT with its logo and interface.</li>
+          <li><b>The file journey.</b> The voice memo is saved from the phone to the Mac, then attached with ChatGPT's + button and the Mac file picker.</li>
+          <li><b>Intermediate tip 1:</b> turn the chat into a <b>skill</b>, so next time you just send a voice memo.</li>
+          <li><b>Intermediate tip 2:</b> a <b>scheduled task</b> that tidies the "To organize" folder every weekday morning, with no new prompts.</li>
+        </ul>
+      </div>
+      <div class="tl">
+        <div class="when">Oct 16–24 · Polish, round after round</div>
+        <h3>Small changes that made it presentable</h3>
+        <ul>
+          <li><b>Click control:</b> long clips split into separate slides wherever I wanted to pause and talk.</li>
+          <li><b>Pacing:</b> the read-along sped up to 200 words per minute, and the meeting slowed down so bubbles are readable.</li>
+          <li><b>Story beats:</b> "I'll record this meeting for my AI"… then "Uh-oh, I forgot to record it!"</li>
+          <li><b>Realism:</b> a Finder view of the organized folders, a phone share sheet into the "To organize" folder, and ChatGPT offering to act on the action list.</li>
+          <li><b>Waiting slides:</b> the title and thank-you robots loop seamlessly before and after the talk.</li>
+          <li><b>Privacy:</b> a flag showing how to stop your files being used for training ("Help improve Claude" or "Improve the model for everyone").</li>
+        </ul>
+      </div>
+      <div class="tl">
+        <div class="when">Oct 25 · Talk day</div>
+        <h3>28 slides, 14:30, and a backup plan</h3>
+        <p>The final deck runs in a browser with presenter mode, in the public web player, and as a 14-minute backup video that advances on its own.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="wrap">
+    <div class="eyebrow">From the finished deck</div>
+    <h2>What the clips look like.</h2>
+    <p class="lead">Every frame below is from a rendered HyperFrames clip. It's all HTML, CSS and animation code, with no screen recording.</p>
+    <div class="gallery">
+      <figure><img src="img/admin.jpg" alt="You run the business, AI does the admin" /><figcaption><b>The theme</b>Admin piles up and your evening drains, then AI files it.</figcaption></figure>
+      <figure><img src="img/meeting.jpg" alt="Meeting with Aliya as chat bubbles" /><figcaption><b>The client meeting</b>13 details, one that really matters: a nut allergy.</figcaption></figure>
+      <figure><img src="img/ramble.jpg" alt="Voice memo read-along" /><figcaption><b>Don't type, ramble</b>A read-along I narrate live, in sync with the slide.</figcaption></figure>
+      <figure><img src="img/round1.jpg" alt="Round 1 generic quote in ChatGPT" /><figcaption><b>Round 1</b>One line, no context: looks amateur, can't send it.</figcaption></figure>
+      <figure><img src="img/picker.jpg" alt="Mac file picker attaching the voice memo" /><figcaption><b>The file journey</b>Pick the voice memo, rate sheet and past quote.</figcaption></figure>
+      <figure><img src="img/quote.jpg" alt="Priced quote in house format" /><figcaption><b>Round 2</b>A priced quote in my format, using my real rates.</figcaption></figure>
+      <figure><img src="img/confirm.jpg" alt="Please confirm before sending" /><figcaption><b>Human in the loop</b>AI flags what it can't know. My click approves it.</figcaption></figure>
+      <figure><img src="img/skill.jpg" alt="Intermediate tip: turn it into a skill" /><figcaption><b>Intermediate tip</b>Save the workflow as a skill and reuse it.</figcaption></figure>
+      <figure><img src="img/share.jpg" alt="Share sheet into the To organize folder" /><figcaption><b>Snap and share</b>Phone photos land next to the messy PDFs.</figcaption></figure>
+      <figure><img src="img/finder.jpg" alt="Finder showing organized folders" /><figcaption><b>Organized on the Mac</b>Renamed, sorted, and the inbox folder is empty.</figcaption></figure>
+      <figure><img src="img/actions.jpg" alt="Action list in ChatGPT" /><figcaption><b>The action list</b>Due dates, money owed, a duplicate, and an offer to act.</figcaption></figure>
+      <figure><img src="img/schedule.jpg" alt="Scheduled task" /><figcaption><b>Intermediate tip</b>A scheduled task that tidies the folder every morning.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="wrap">
+    <div class="eyebrow">The toolkit</div>
+    <h2>Everything I used.</h2>
+    <div class="tools">
+      <table>
+        <thead><tr><th>Tool</th><th>What it did</th></tr></thead>
+        <tbody>
+          <tr><td>Claude voice mode<span class="ph one">PART 1</span></td><td>Hands-free brainstorming in the car: the audience, the story and the demo ideas.</td></tr>
+          <tr><td>Claude desktop chat<span class="ph one">PART 1</span></td><td>Settled the direction, wrote the ramble script and prompts, and generated the demo files and planted surprises.</td></tr>
+          <tr><td>Claude Code CLI<span class="ph two">PART 2</span></td><td>Built everything else from my plain-English requests: storyboard, scenes, numbers, fixes, renders, publishing.</td></tr>
+          <tr><td>HeyGen HyperFrames<span class="ph two">PART 2</span></td><td>Open-source HTML-to-video framework. Its local skills and CLI were used to write scenes, run lint/check gates, snapshot frames, render MP4s, and run the presenter-mode slideshow.</td></tr>
+          <tr><td>GSAP<span class="ph two">PART 2</span></td><td>The animation library behind every motion: typing, bubbles, cursors, seamless loops.</td></tr>
+          <tr><td>FFmpeg<span class="ph two">PART 2</span></td><td>Cut clips into click-controlled slides and stitched the 14-minute backup video.</td></tr>
+          <tr><td>Web search<span class="ph two">PART 2</span></td><td>Fact-checked product claims before they went on a slide: audio uploads, Skills, Scheduled tasks, privacy settings.</td></tr>
+          <tr><td>Claude Docs<span class="ph two">PART 2</span></td><td>A shareable speaker-notes doc with a script and timing for every slide.</td></tr>
+          <tr><td>GitHub Pages<span class="ph two">PART 2</span></td><td>Free public hosting for the web deck (and this page), published with the GitHub CLI.</td></tr>
+          <tr><td>Headless Chrome tests<span class="ph two">PART 2</span></td><td>After every change, an automated pass clicked through all slides to confirm each clip plays.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="eyebrow">My direction</div>
+    <h2>Features and techniques I asked for.</h2>
+    <div class="feat">
+      <div class="card">
+        <span class="tag">HyperFrames best practices I brought in</span>
+        <h3>From my own research, pasted into the chat</h3>
+        <div class="chips">
+          <span class="chip">Local HyperFrames skills, not the cloud connector</span>
+          <span class="chip">Short scenes, built in pieces</span>
+          <span class="chip">Hard cuts most of the time</span>
+          <span class="chip">Continuous motion, never static</span>
+          <span class="chip">Smooth show/hide (autoAlpha)</span>
+          <span class="chip">A brand design file</span>
+          <span class="chip">Real assets folder</span>
+          <span class="chip">Lint + check gates before render</span>
+          <span class="chip">Preview while iterating</span>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag">Presentation features I requested</span>
+        <h3>So it works in a real room</h3>
+        <div class="chips">
+          <span class="chip v">Presenter mode + speaker notes</span>
+          <span class="chip v">MP4 backup of every clip</span>
+          <span class="chip v">I control every transition</span>
+          <span class="chip v">Read-along captions</span>
+          <span class="chip v">Branded ChatGPT windows</span>
+          <span class="chip v">Phone-to-Mac file steps</span>
+          <span class="chip v">Intermediate tips</span>
+          <span class="chip v">Looping title + thank-you</span>
+          <span class="chip v">Privacy flag</span>
+          <span class="chip v">Public link for reviewers</span>
+          <span class="chip v">Auto-hiding player controls</span>
+          <span class="chip v">Full backup video</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="lessons">
+  <div class="wrap">
+    <div class="eyebrow">If you want to try this</div>
+    <h2>What I'd tell a friend.</h2>
+    <div class="lessons">
+      <div class="lesson"><h3>Talk first, build later</h3><p>Voice mode is great for thinking out loud. Settle the story before anyone builds a slide.</p></div>
+      <div class="lesson"><h3>Give it real material</h3><p>Real rate sheets, receipts and photos made the demos believable, and the numbers correct.</p></div>
+      <div class="lesson"><h3>Judge a sample first</h3><p>Four slides told me whether the style worked before investing in all 28.</p></div>
+      <div class="lesson"><h3>Fact-check before the stage</h3><p>Asking "can it really do that?" caught that Claude's chat can't take audio files, before I promised it.</p></div>
+      <div class="lesson"><h3>Keep your hands on the wheel</h3><p>I reviewed every round and asked for splits wherever I wanted to pause. AI drafts, I decide.</p></div>
+      <div class="lesson"><h3>Always have a backup</h3><p>A public link, a local deck and a backup video meant nothing could sink the talk.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <div class="eyebrow">See the result</div>
+    <h2>Click through the whole presentation.</h2>
+    <p class="lead" style="margin-inline: auto">Use ← → to move between slides, N for speaker notes, F for fullscreen.</p>
+    <div class="ctas">
+      <a class="btn primary" href="../">▶ Open the presentation</a>
+      <a class="btn ghost" href="https://github.com/ognorthdev/2026-10-ai-small-business-talk">View on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Made by Rahim Daya with Claude (voice, desktop and Claude Code) and HeyGen HyperFrames · All businesses and documents in the demos are fictional.</div>
+</footer>
+</body>
+</html>
